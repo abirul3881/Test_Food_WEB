@@ -47,13 +47,12 @@ document.addEventListener("DOMContentLoaded", () => {
       minutes: minutes,
       seconds: seconds,
     };
-
-    function getZero(num) {
-      if (num >= 0 && num < 10) {
-        return `0{num}`;
-      } else {
-        return num;
-      }
+  }
+  function getZero(num) {
+    if (num >= 0 && num < 10) {
+      return `0{num}`;
+    } else {
+      return num;
     }
   }
   function setClock(selector, endtime) {
@@ -79,4 +78,40 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   setClock(".timer", dedline);
+
+  // Modal
+
+  const modalTrigger = document.querySelectorAll("[data-modal]"),
+    modal = document.querySelector(".modal"),
+    modalCloseBtn = document.querySelector("[data-close]");
+
+  modalTrigger.forEach((btn) => {
+    btn.addEventListener("click", function () {
+      modal.classList.add("show");
+      modal.classList.remove("hide");
+      // Либо вариант с toggle - но тогда назначить класс в верстке
+      document.body.style.overflow = "hidden";
+    });
+  });
+
+  function closeModal() {
+    modal.classList.add("hide");
+    modal.classList.remove("show");
+    // Либо вариант с toggle - но тогда назначить класс в верстке
+    document.body.style.overflow = "";
+  }
+
+  modalCloseBtn.addEventListener("click", closeModal);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Escape" && modal.classList.contains("show")) {
+      closeModal();
+    }
+  });
 });
