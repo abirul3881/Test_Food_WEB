@@ -1,44 +1,52 @@
-document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", function () {
   // Tabs
-  const tabs = document.querySelectorAll(".tabheader__item");
-  const tabsContent = document.querySelectorAll(".tabcontent");
-  const tabsParrent = document.querySelector(".tabheader__items");
 
-  function hideTabeContent() {
-    tabsContent.forEach((tabs) => {
-      tabs.style.display = "none";
+  let tabs = document.querySelectorAll(".tabheader__item"),
+    tabsContent = document.querySelectorAll(".tabcontent"),
+    tabsParent = document.querySelector(".tabheader__items");
+
+  function hideTabContent() {
+    tabsContent.forEach((item) => {
+      item.classList.add("hide");
+      item.classList.remove("show", "fade");
     });
-    tabs.forEach((tabItem) => {
-      tabItem.classList.remove("tabheader__item_active");
+
+    tabs.forEach((item) => {
+      item.classList.remove("tabheader__item_active");
     });
   }
+
   function showTabContent(i = 0) {
-    tabsContent[i].style.display = "block";
+    tabsContent[i].classList.add("show", "fade");
+    tabsContent[i].classList.remove("hide");
     tabs[i].classList.add("tabheader__item_active");
   }
-  hideTabeContent();
+
+  hideTabContent();
   showTabContent();
 
-  tabsParrent.addEventListener("click", (event) => {
+  tabsParent.addEventListener("click", function (event) {
     const target = event.target;
     if (target && target.classList.contains("tabheader__item")) {
-      tabs.forEach((itemTab, i) => {
-        if (target == itemTab) {
-          hideTabeContent();
+      tabs.forEach((item, i) => {
+        if (target == item) {
+          hideTabContent();
           showTabContent(i);
         }
       });
     }
   });
-  //Timer
-  const dedline = "16-11-22";
 
-  function getTimeremaining(endtime) {
-    const t = Date.parse(endtime) - Date.parse(new Date());
-    const days = Math.floor(t / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((t / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((t / 1000 / 60) % 60);
-    const seconds = Math.floor((t / 1000) % 60);
+  // Timer
+
+  const deadline = "2025-06-11";
+
+  function getTimeRemaining(endtime) {
+    const t = Date.parse(endtime) - Date.parse(new Date()),
+      days = Math.floor(t / (1000 * 60 * 60 * 24)),
+      seconds = Math.floor((t / 1000) % 60),
+      minutes = Math.floor((t / 1000 / 60) % 60),
+      hours = Math.floor((t / (1000 * 60 * 60)) % 24);
 
     return {
       total: t,
@@ -48,25 +56,28 @@ document.addEventListener("DOMContentLoaded", () => {
       seconds: seconds,
     };
   }
+
   function getZero(num) {
     if (num >= 0 && num < 10) {
-      return `0{num}`;
+      return "0" + num;
     } else {
       return num;
     }
   }
+
   function setClock(selector, endtime) {
-    const timer = document.querySelector(selector);
-    const days = timer.querySelector("#days");
-    const hours = timer.querySelector("#hours");
-    const minutes = timer.querySelector("#minutes");
-    const seconds = timer.querySelector("#seconds");
-    const timeInterval = setInterval(upDateClock, 1000);
+    const timer = document.querySelector(selector),
+      days = timer.querySelector("#days"),
+      hours = timer.querySelector("#hours"),
+      minutes = timer.querySelector("#minutes"),
+      seconds = timer.querySelector("#seconds"),
+      timeInterval = setInterval(updateClock, 1000);
 
-    upDateClock();
+    updateClock();
 
-    function upDateClock() {
-      const t = getTimeremaining(endtime);
+    function updateClock() {
+      const t = getTimeRemaining(endtime);
+
       days.innerHTML = getZero(t.days);
       hours.innerHTML = getZero(t.hours);
       minutes.innerHTML = getZero(t.minutes);
@@ -77,7 +88,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   }
-  setClock(".timer", dedline);
+
+  setClock(".timer", deadline);
 
   // Modal
 
@@ -85,28 +97,21 @@ document.addEventListener("DOMContentLoaded", () => {
     modal = document.querySelector(".modal"),
     modalCloseBtn = document.querySelector("[data-close]");
 
-  function openModal() {
-    modal.classList.add("show");
-    modal.classList.remove("hide");
-    document.body.style.overflow = "hidden";
-  }
-
   modalTrigger.forEach((btn) => {
     btn.addEventListener("click", openModal);
   });
+
+  function closeModal() {
+    modal.classList.add("hide");
+    modal.classList.remove("show");
+    document.body.style.overflow = "";
+  }
 
   function openModal() {
     modal.classList.add("show");
     modal.classList.remove("hide");
     document.body.style.overflow = "hidden";
     clearInterval(modalTimerId);
-  }
-
-  function closeModal() {
-    modal.classList.add("hide");
-    modal.classList.remove("show");
-    // Либо вариант с toggle - но тогда назначить класс в верстке
-    document.body.style.overflow = "";
   }
 
   modalCloseBtn.addEventListener("click", closeModal);
@@ -123,17 +128,80 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  const modalTimerId = setTimeout(openModal, 3000);
+  // const modalTimerId = setTimeout(openModal, 3000);
+  // Закомментировал, чтобы не отвлекало
 
   function showModalByScroll() {
     if (
       window.pageYOffset + document.documentElement.clientHeight >=
-      document.documentElement.scrollHeight - 1
+      document.documentElement.scrollHeight
     ) {
       openModal();
       window.removeEventListener("scroll", showModalByScroll);
     }
   }
-
   window.addEventListener("scroll", showModalByScroll);
+
+  // Используем классы для создание карточек меню
+
+  class MenuCard {
+    constructor(src, alt, title, descr, price, parentSelector) {
+      this.src = src;
+      this.alt = alt;
+      this.title = title;
+      this.descr = descr;
+      this.price = price;
+      this.parent = document.querySelector(parentSelector);
+      this.transfer = 27;
+      this.changeToUAH();
+    }
+
+    changeToUAH() {
+      this.price = this.price * this.transfer;
+    }
+
+    render() {
+      const element = document.createElement("div");
+      element.innerHTML = `
+              <div class="menu__item">
+                  <img src=${this.src} alt=${this.alt}>
+                  <h3 class="menu__item-subtitle">${this.title}</h3>
+                  <div class="menu__item-descr">${this.descr}</div>
+                  <div class="menu__item-divider"></div>
+                  <div class="menu__item-price">
+                      <div class="menu__item-cost">Цена:</div>
+                      <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
+                  </div>
+              </div>
+          `;
+      this.parent.append(element);
+    }
+  }
+
+  new MenuCard(
+    "img/tabs/vegy.jpg",
+    "vegy",
+    'Меню "Фитнес"',
+    'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
+    9,
+    ".menu .container"
+  ).render();
+
+  new MenuCard(
+    "img/tabs/post.jpg",
+    "post",
+    'Меню "Постное"',
+    "Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.",
+    14,
+    ".menu .container"
+  ).render();
+
+  new MenuCard(
+    "img/tabs/elite.jpg",
+    "elite",
+    "Меню “Премиум”",
+    "В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!",
+    21,
+    ".menu .container"
+  ).render();
 });
